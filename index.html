@@ -25,7 +25,7 @@
     
     <!-- CSS-Styles -->
     <style>
-        /* Dein bestehendes CSS */
+        /* Allgemeine Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121213;
@@ -72,7 +72,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, box-shadow 0.3s;
+            transition: transform 0.2s, box-shadow 0.3s, background-color 0.3s;
             user-select: none;
         }
 
@@ -107,6 +107,15 @@
             color: #ffffff;
             box-shadow: 0 0 10px #a83232; /* Glow-Effekt */
             animation: fadeIn 1s ease; /* Animation hinzugefügt */
+        }
+
+        /* Neue Klasse für ungültige Wörter */
+        .invalid {
+            background-color: #ff4d4d; /* Blasser Rotton */
+            border-color: #ff4d4d;
+            color: #ffffff;
+            box-shadow: 0 0 10px #ff4d4d; /* Glow-Effekt */
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
         @keyframes fadeIn {
@@ -177,7 +186,7 @@
             justify-content: center;
             box-sizing: border-box;
             user-select: none;
-            transition: box-shadow 0.3s;
+            transition: box-shadow 0.3s, background-color 0.3s;
         }
 
         .key.correct {
@@ -258,7 +267,7 @@
             // Tastatur zurücksetzen
             const keys = keyboard.getElementsByClassName("key");
             for (const key of keys) {
-                key.classList.remove("correct", "present", "absent");
+                key.classList.remove("correct", "present", "absent", "invalid");
             }
 
             // Variablen zurücksetzen
@@ -269,6 +278,7 @@
             for (let key in usedLetters) {
                 delete usedLetters[key];
             }
+            // Entferne den Inhalt des Message-Elements
             messageElement.textContent = '';
 
             // Neues Zielwort auswählen
@@ -366,7 +376,17 @@
 
             if (!WORDS.includes(guess)) {
                 row.classList.add("shake");
-                setTimeout(() => row.classList.remove("shake"), 500);
+                // Markiere alle Tiles der aktuellen Reihe als ungültig
+                for (let i = 0; i < 5; i++) {
+                    row.children[i].classList.add("invalid");
+                }
+                setTimeout(() => {
+                    row.classList.remove("shake");
+                    // Entferne die ungültigen Markierungen nach der Animation
+                    for (let i = 0; i < 5; i++) {
+                        row.children[i].classList.remove("invalid");
+                    }
+                }, 500);
                 return;
             }
 
@@ -414,14 +434,12 @@
                         if (i === 4) {
                             if (guess === targetWord) {
                                 gameOver = true;
-                                messageElement.textContent = "Glückwunsch! Du hast das Wort erraten!";
                                 // Klick zum Neustart ermöglichen
                                 enableRestart();
                             } else {
                                 if (currentRow === 5) {
                                     // Lösungswort anzeigen
                                     showSolution();
-                                    messageElement.textContent = "Leider verloren. Das Wort war: " + targetWord.toUpperCase();
                                     gameOver = true;
                                     // Klick zum Neustart ermöglichen
                                     enableRestart();
@@ -443,14 +461,13 @@
                 const actualLetter = (letter === 'ẞ') ? 'ß' : letter;
                 const status = usedLetters[actualLetter];
                 if (status) {
-                    key.classList.remove("correct", "present", "absent");
+                    key.classList.remove("correct", "present", "absent", "invalid");
                     key.classList.add(status);
                 }
             }
         }
 
         function enableRestart() {
-            messageElement.textContent += " Tippe irgendwo, um neu zu starten.";
             document.body.addEventListener('click', restartGame);
         }
 
@@ -458,7 +475,6 @@
             // Event Listener entfernen, um Mehrfachaufrufe zu vermeiden
             document.body.removeEventListener('click', restartGame);
             initializeGame();
-            messageElement.textContent = '';
             // Entferne die Lösungsreihe, falls vorhanden
             const solutionRow = document.querySelector(".solution");
             if (solutionRow) {
@@ -499,7 +515,8 @@
             })
             .catch(error => {
                 console.error('Fehler beim Laden der Wortliste:', error);
-                messageElement.textContent = 'Fehler beim Laden der Wortliste.';
+                // Entferne die Fehlermeldung, um keine Nachrichten anzuzeigen
+                // messageElement.textContent = 'Fehler beim Laden der Wortliste.';
             });
     </script>
 </body>
