@@ -14,6 +14,8 @@
     <meta name="apple-mobile-web-app-title" content="Wordle auf Deutsch">
     <!-- App-Icons für iOS -->
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <!-- Safari-Titelfarbe -->
+    <meta name="theme-color" content="#121213">
     <!-- Rest deines CSS und anderer Head-Inhalte -->
     <style>
         /* Dein bestehendes CSS */
@@ -111,30 +113,6 @@
             }
         }
 
-        @keyframes flip-in {
-            0% {
-                transform: rotateX(0deg);
-            }
-            50% {
-                transform: rotateX(-90deg);
-            }
-            100% {
-                transform: rotateX(-180deg);
-            }
-        }
-
-        @keyframes flip-out {
-            0% {
-                transform: rotateX(-180deg);
-            }
-            50% {
-                transform: rotateX(-270deg);
-            }
-            100% {
-                transform: rotateX(-360deg);
-            }
-        }
-
         @keyframes pop {
             0% {
                 transform: scale(1);
@@ -229,7 +207,7 @@
     <!-- Service Worker Registrierung -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
+            navigator.serviceWorker.register('sw.js', { scope: './' })
                 .then(function(registration) {
                     console.log('Service Worker registriert mit Scope:', registration.scope);
                 })
@@ -239,7 +217,7 @@
         }
     </script>
     <script>
-        /* Dein bestehender JavaScript-Code */
+        /* Dein JavaScript-Code */
         let WORDS = [];
         let targetWord = '';
         let currentRow = 0;
@@ -334,7 +312,7 @@
                 handleKey('backspace');
             } else if (key === "enter") {
                 handleKey('enter');
-            } else if (/^[a-zäöüẞ]$/i.test(key)) {
+            } else if (/^[a-zäöüß]$/i.test(key)) {
                 handleKey(key);
             }
         }
@@ -359,10 +337,10 @@
                     row.classList.add("shake");
                     setTimeout(() => row.classList.remove("shake"), 500);
                 }
-            } else if (/^[a-zäöüẞ]$/i.test(key)) {
+            } else if (/^[a-zäöüß]$/i.test(key)) {
                 if (currentCol < 5) {
                     const tile = row.children[currentCol];
-                    const displayKey = (key === 'ß') ? 'ẞ' : key.toUpperCase();
+                    const displayKey = (key === 'ß' || key === 'ẞ') ? 'ẞ' : key.toUpperCase();
                     tile.textContent = displayKey;
                     tile.classList.add("filled");
                     const lowerKey = key.toLowerCase();
@@ -386,32 +364,39 @@
             const targetLetters = targetWord.split("");
             const guessLetters = guess.split("");
 
+            const letterStatus = ['absent', 'absent', 'absent', 'absent', 'absent'];
+
+            // Zuerst Buchstaben markieren, die korrekt sind
+            for (let i = 0; i < 5; i++) {
+                if (guessLetters[i] === targetLetters[i]) {
+                    letterStatus[i] = 'correct';
+                    targetLetters[i] = null;
+                }
+            }
+
+            // Dann Buchstaben markieren, die vorhanden sind, aber an falscher Position
+            for (let i = 0; i < 5; i++) {
+                if (letterStatus[i] === 'correct') continue;
+                const index = targetLetters.indexOf(guessLetters[i]);
+                if (index !== -1) {
+                    letterStatus[i] = 'present';
+                    targetLetters[index] = null;
+                }
+            }
+
             // Animationen für Flip-Effekt
             for (let i = 0; i < 5; i++) {
                 const tile = row.children[i];
+                const status = letterStatus[i];
                 setTimeout(() => {
                     tile.style.transform = "rotateX(90deg)";
                     setTimeout(() => {
                         tile.style.transform = "rotateX(0deg)";
-                        const letter = guessLetters[i];
+                        tile.classList.add(status);
 
-                        if (letter === targetLetters[i]) {
-                            tile.classList.add("correct");
-                            usedLetters[letter] = "correct";
-                            targetLetters[i] = null;
-                            guessLetters[i] = null;
-                        } else if (letter && targetLetters.includes(letter)) {
-                            tile.classList.add("present");
-                            if (usedLetters[letter] !== "correct") {
-                                usedLetters[letter] = "present";
-                            }
-                            targetLetters[targetLetters.indexOf(letter)] = null;
-                            guessLetters[i] = null;
-                        } else {
-                            tile.classList.add("absent");
-                            if (!usedLetters[letter]) {
-                                usedLetters[letter] = "absent";
-                            }
+                        const letter = guessLetters[i];
+                        if (usedLetters[letter] !== 'correct') {
+                            usedLetters[letter] = status;
                         }
 
                         // Keyboard aktualisieren
@@ -420,12 +405,14 @@
                         if (i === 4) {
                             if (guess === targetWord) {
                                 gameOver = true;
+                                messageElement.textContent = "Glückwunsch! Du hast das Wort erraten!";
                                 // Klick zum Neustart ermöglichen
                                 enableRestart();
                             } else {
                                 if (currentRow === 5) {
                                     // Lösungswort anzeigen
                                     showSolution();
+                                    messageElement.textContent = "Leider verloren. Das Wort war: " + targetWord.toUpperCase();
                                     gameOver = true;
                                     // Klick zum Neustart ermöglichen
                                     enableRestart();
@@ -445,20 +432,16 @@
             for (const key of keys) {
                 const letter = key.dataset.key.toLowerCase();
                 const actualLetter = (letter === 'ẞ') ? 'ß' : letter;
-                if (usedLetters[actualLetter] === "correct") {
-                    key.classList.remove("present", "absent");
-                    key.classList.add("correct");
-                } else if (usedLetters[actualLetter] === "present") {
-                    key.classList.remove("correct", "absent");
-                    key.classList.add("present");
-                } else if (usedLetters[actualLetter] === "absent") {
-                    key.classList.remove("correct", "present");
-                    key.classList.add("absent");
+                const status = usedLetters[actualLetter];
+                if (status) {
+                    key.classList.remove("correct", "present", "absent");
+                    key.classList.add(status);
                 }
             }
         }
 
         function enableRestart() {
+            messageElement.textContent += " Tippe irgendwo, um neu zu starten.";
             document.body.addEventListener('click', restartGame);
         }
 
@@ -466,6 +449,12 @@
             // Event Listener entfernen, um Mehrfachaufrufe zu vermeiden
             document.body.removeEventListener('click', restartGame);
             initializeGame();
+            messageElement.textContent = '';
+            // Entferne die Lösungsreihe, falls vorhanden
+            const solutionRow = document.querySelector(".solution");
+            if (solutionRow) {
+                solutionRow.remove();
+            }
         }
 
         function showSolution() {
@@ -491,7 +480,7 @@
             .then(response => response.json())
             .then(data => {
                 // Nur Wörter mit 5 Buchstaben filtern
-                WORDS = data.filter(word => word.length === 5 && /^[a-zA-ZäöüÄÖÜẞß]+$/.test(word));
+                WORDS = data.filter(word => word.length === 5 && /^[a-zA-ZäöüÄÖÜß]+$/.test(word));
                 // Alle Wörter in Kleinbuchstaben umwandeln
                 WORDS = WORDS.map(word => word.toLowerCase());
                 // Doppelte Wörter entfernen

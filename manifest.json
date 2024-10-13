@@ -2,7 +2,7 @@
   "name": "Wordle auf Deutsch",
   "short_name": "Wordle DE",
   "description": "Ein deutsches Wordle-Spiel.",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121213",
   "theme_color": "#121213",
