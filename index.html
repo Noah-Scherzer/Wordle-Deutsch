@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wordle auf Deutsch</title>
+    <!-- Favicon hinzufügen -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Manifest-Datei einbinden -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Meta-Tags für iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Wordle auf Deutsch">
+    <!-- App-Icons für iOS -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <!-- Rest deines CSS und anderer Head-Inhalte -->
     <style>
+        /* Dein bestehendes CSS */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121213;
@@ -214,7 +226,20 @@
     <div id="game"></div>
     <p id="message"></p>
     <div id="keyboard"></div>
+    <!-- Service Worker Registrierung -->
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(function(registration) {
+                    console.log('Service Worker registriert mit Scope:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('Service Worker Registrierung fehlgeschlagen:', error);
+                });
+        }
+    </script>
+    <script>
+        /* Dein bestehender JavaScript-Code */
         let WORDS = [];
         let targetWord = '';
         let currentRow = 0;
