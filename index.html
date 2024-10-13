@@ -325,13 +325,17 @@
         function handleKeydown(e) {
             if (gameOver) return;
 
-            const key = e.key.toLowerCase();
+            const key = e.key;
 
-            if (key === "backspace") {
+            // Debugging: Protokolliere die gedrückte Taste
+            console.log('Gedrückte Taste:', key);
+
+            // Erweitere den regulären Ausdruck, um auch 'ẞ' zu erfassen
+            if (key === "Backspace") {
                 handleKey('backspace');
-            } else if (key === "enter") {
+            } else if (key === "Enter") {
                 handleKey('enter');
-            } else if (/^[a-zäöüß]$/i.test(key)) {
+            } else if (/^[a-zäöüßẞ]$/i.test(key)) {
                 handleKey(key);
             }
         }
@@ -356,7 +360,7 @@
                     row.classList.add("shake");
                     setTimeout(() => row.classList.remove("shake"), 500);
                 }
-            } else if (/^[a-zäöüß]$/i.test(key)) {
+            } else if (/^[a-zäöüßẞ]$/i.test(key)) {
                 if (currentCol < 5) {
                     const tile = row.children[currentCol];
                     const displayKey = (key === 'ß' || key === 'ẞ') ? 'ẞ' : key.toUpperCase();
@@ -505,7 +509,7 @@
             .then(response => response.json())
             .then(data => {
                 // Nur Wörter mit 5 Buchstaben filtern
-                WORDS = data.filter(word => word.length === 5 && /^[a-zA-ZäöüÄÖÜß]+$/.test(word));
+                WORDS = data.filter(word => word.length === 5 && /^[a-zäöüÄÖÜß]+$/.test(word));
                 // Alle Wörter in Kleinbuchstaben umwandeln
                 WORDS = WORDS.map(word => word.toLowerCase());
                 // Doppelte Wörter entfernen
