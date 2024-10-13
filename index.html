@@ -2,21 +2,28 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Viewport Meta-Tag angepasst, um das Zoomen zu deaktivieren -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wordle auf Deutsch</title>
+    
     <!-- Favicon hinzufügen -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
     <!-- Manifest-Datei einbinden -->
     <link rel="manifest" href="manifest.json">
+    
     <!-- Meta-Tags für iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Wordle auf Deutsch">
+    
     <!-- App-Icons für iOS -->
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <!-- Safari-Titelfarbe -->
+    
+    <!-- Theme-Farbe für Safari -->
     <meta name="theme-color" content="#121213">
-    <!-- Rest deines CSS und anderer Head-Inhalte -->
+    
+    <!-- CSS-Styles -->
     <style>
         /* Dein bestehendes CSS */
         body {
@@ -204,6 +211,7 @@
     <div id="game"></div>
     <p id="message"></p>
     <div id="keyboard"></div>
+    
     <!-- Service Worker Registrierung -->
     <script>
         if ('serviceWorker' in navigator) {
@@ -216,8 +224,9 @@
                 });
         }
     </script>
+    
+    <!-- Spiel-JavaScript -->
     <script>
-        /* Dein JavaScript-Code */
         let WORDS = [];
         let targetWord = '';
         let currentRow = 0;
