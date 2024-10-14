@@ -301,7 +301,7 @@
         const keyboardLayout = [
             ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü'],
             ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä'],
-            ['enter', 'y', 'x', 'c', 'v', 'b', 'n', 'm', 'ẞ', 'backspace']
+            ['enter', 'y', 'x', 'c', 'v', 'b', 'n', 'm', 'ß', 'backspace'] // Ändere 'ẞ' zu 'ß'
         ];
 
         keyboardLayout.forEach(row => {
@@ -325,17 +325,20 @@
         function handleKeydown(e) {
             if (gameOver) return;
 
-            const key = e.key;
+            let key = e.key;
 
-            // Debugging: Protokolliere die gedrückte Taste
-            console.log('Gedrückte Taste:', key);
+            // Umwandeln von 'ẞ' zu 'ß'
+            if (key === 'ẞ') {
+                key = 'ß';
+            }
 
-            // Erweitere den regulären Ausdruck, um auch 'ẞ' zu erfassen
-            if (key === "Backspace") {
+            key = key.toLowerCase();
+
+            if (key === "backspace") {
                 handleKey('backspace');
-            } else if (key === "Enter") {
+            } else if (key === "enter") {
                 handleKey('enter');
-            } else if (/^[a-zäöüßẞ]$/i.test(key)) {
+            } else if (/^[a-zäöüß]$/i.test(key)) {
                 handleKey(key);
             }
         }
@@ -360,14 +363,14 @@
                     row.classList.add("shake");
                     setTimeout(() => row.classList.remove("shake"), 500);
                 }
-            } else if (/^[a-zäöüßẞ]$/i.test(key)) {
+            } else if (/^[a-zäöüß]$/i.test(key)) {
                 if (currentCol < 5) {
                     const tile = row.children[currentCol];
-                    const displayKey = (key === 'ß' || key === 'ẞ') ? 'ẞ' : key.toUpperCase();
+                    const displayKey = (key === 'ß') ? 'ẞ' : key.toUpperCase();
                     tile.textContent = displayKey;
                     tile.classList.add("filled");
                     const lowerKey = key.toLowerCase();
-                    const actualKey = (lowerKey === 'ß' || lowerKey === 'ẞ') ? 'ß' : lowerKey;
+                    const actualKey = (lowerKey === 'ß') ? 'ß' : lowerKey;
                     guesses[currentRow] += actualKey;
                     currentCol++;
                 }
@@ -462,7 +465,7 @@
             const keys = keyboard.getElementsByClassName("key");
             for (const key of keys) {
                 const letter = key.dataset.key.toLowerCase();
-                const actualLetter = (letter === 'ẞ') ? 'ß' : letter;
+                const actualLetter = (letter === 'ß') ? 'ß' : letter;
                 const status = usedLetters[actualLetter];
                 if (status) {
                     key.classList.remove("correct", "present", "absent", "invalid");
@@ -509,7 +512,7 @@
             .then(response => response.json())
             .then(data => {
                 // Nur Wörter mit 5 Buchstaben filtern
-                WORDS = data.filter(word => word.length === 5 && /^[a-zäöüÄÖÜß]+$/.test(word));
+                WORDS = data.filter(word => word.length === 5 && /^[a-zäöüß]+$/.test(word));
                 // Alle Wörter in Kleinbuchstaben umwandeln
                 WORDS = WORDS.map(word => word.toLowerCase());
                 // Doppelte Wörter entfernen
