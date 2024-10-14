@@ -283,25 +283,17 @@
 
             // Neues Zielwort auswählen
             targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            console.log("Neues Zielwort:", targetWord); // Zum Debuggen
         }
 
-        // Spielfeld erstellen (zuerst einmalig)
-        for (let i = 0; i < 6; i++) {
-            const row = document.createElement("div");
-            row.className = "row";
-            for (let j = 0; j < 5; j++) {
-                const tile = document.createElement("div");
-                tile.className = "tile";
-                row.appendChild(tile);
-            }
-            game.appendChild(row);
-        }
+        // Initialisiere das Spiel beim Laden der Seite
+        initializeGame();
 
         // Deutsches Keyboard-Layout erstellen
         const keyboardLayout = [
             ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü'],
             ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä'],
-            ['enter', 'y', 'x', 'c', 'v', 'b', 'n', 'm', 'ß', 'backspace'] // Ändere 'ẞ' zu 'ß'
+            ['enter', 'y', 'x', 'c', 'v', 'b', 'n', 'm', 'ẞ', 'backspace']
         ];
 
         keyboardLayout.forEach(row => {
@@ -325,20 +317,13 @@
         function handleKeydown(e) {
             if (gameOver) return;
 
-            let key = e.key;
+            const key = e.key;
 
-            // Umwandeln von 'ẞ' zu 'ß'
-            if (key === 'ẞ') {
-                key = 'ß';
-            }
-
-            key = key.toLowerCase();
-
-            if (key === "backspace") {
+            if (key === "Backspace") {
                 handleKey('backspace');
-            } else if (key === "enter") {
+            } else if (key === "Enter") {
                 handleKey('enter');
-            } else if (/^[a-zäöüß]$/i.test(key)) {
+            } else if (/^[a-zäöüßẞ]$/i.test(key)) { // Teste das Originalzeichen, nicht die lowercased Version
                 handleKey(key);
             }
         }
@@ -363,15 +348,15 @@
                     row.classList.add("shake");
                     setTimeout(() => row.classList.remove("shake"), 500);
                 }
-            } else if (/^[a-zäöüß]$/i.test(key)) {
+            } else if (/^[a-zäöüßẞ]$/i.test(key)) { // 'ẞ' hinzugefügt
                 if (currentCol < 5) {
                     const tile = row.children[currentCol];
-                    const displayKey = (key === 'ß') ? 'ẞ' : key.toUpperCase();
+                    const displayKey = (key === 'ß' || key === 'ẞ') ? 'ẞ' : key.toUpperCase();
                     tile.textContent = displayKey;
                     tile.classList.add("filled");
-                    const lowerKey = key.toLowerCase();
-                    const actualKey = (lowerKey === 'ß') ? 'ß' : lowerKey;
-                    guesses[currentRow] += actualKey;
+                    let lowerKey = key.toLowerCase();
+                    if (lowerKey === 'ẞ') lowerKey = 'ß'; // 'ẞ' zu 'ß' konvertieren
+                    guesses[currentRow] += lowerKey;
                     currentCol++;
                 }
             }
@@ -464,9 +449,11 @@
         function updateUsedLetters() {
             const keys = keyboard.getElementsByClassName("key");
             for (const key of keys) {
-                const letter = key.dataset.key.toLowerCase();
-                const actualLetter = (letter === 'ß') ? 'ß' : letter;
-                const status = usedLetters[actualLetter];
+                let letter = key.dataset.key.toLowerCase();
+                if (letter === 'ẞ') {
+                    letter = 'ß';
+                }
+                const status = usedLetters[letter];
                 if (status) {
                     key.classList.remove("correct", "present", "absent", "invalid");
                     key.classList.add(status);
@@ -512,17 +499,18 @@
             .then(response => response.json())
             .then(data => {
                 // Nur Wörter mit 5 Buchstaben filtern
-                WORDS = data.filter(word => word.length === 5 && /^[a-zäöüß]+$/.test(word));
-                // Alle Wörter in Kleinbuchstaben umwandeln
-                WORDS = WORDS.map(word => word.toLowerCase());
+                WORDS = data.filter(word => word.length === 5 && /^[a-zäöüß]+$/i.test(word));
+                // Alle Wörter in Kleinbuchstaben umwandeln und 'ẞ' zu 'ß' konvertieren
+                WORDS = WORDS.map(word => word.toLowerCase().replace(/ẞ/g, 'ß'));
                 // Doppelte Wörter entfernen
                 WORDS = Array.from(new Set(WORDS));
+                console.log("Wortliste geladen:", WORDS); // Zum Debuggen
                 // Spiel initialisieren
                 initializeGame();
             })
             .catch(error => {
                 console.error('Fehler beim Laden der Wortliste:', error);
-                // Entferne die Fehlermeldung, um keine Nachrichten anzuzeigen
+                // Keine Fehlermeldung anzeigen
                 // messageElement.textContent = 'Fehler beim Laden der Wortliste.';
             });
     </script>
