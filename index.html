@@ -416,12 +416,8 @@
                         tile.classList.add(status);
 
                         const letter = guessLetters[i];
-                        if (usedLetters[letter] !== 'correct') {
-                            usedLetters[letter] = status;
-                        }
-
-                        // Keyboard aktualisieren
-                        updateUsedLetters();
+                        // Update usedLetters basierend auf den neuen Status
+                        updateUsedLetters(letter, status);
 
                         if (i === 4) {
                             if (guess === targetWord) {
@@ -446,17 +442,46 @@
             }
         }
 
-        function updateUsedLetters() {
-            const keys = keyboard.getElementsByClassName("key");
-            for (const key of keys) {
-                let letter = key.dataset.key.toLowerCase();
-                if (letter === 'ẞ') {
-                    letter = 'ß';
+        function updateUsedLetters(letter, status) {
+            // Prioritätsregeln:
+            // - 'correct' kann nicht überschrieben werden.
+            // - 'present' kann nur von 'correct' überschrieben werden.
+            // - 'absent' kann von allem überschrieben werden.
+
+            const currentStatus = usedLetters[letter];
+
+            if (!currentStatus) {
+                // Kein vorheriger Status, setze den neuen Status
+                usedLetters[letter] = status;
+            } else if (currentStatus === 'correct') {
+                // 'correct' kann nicht überschrieben werden
+                return;
+            } else if (currentStatus === 'present') {
+                if (status === 'correct') {
+                    // 'present' kann nur von 'correct' überschrieben werden
+                    usedLetters[letter] = status;
                 }
-                const status = usedLetters[letter];
-                if (status) {
-                    key.classList.remove("correct", "present", "absent", "invalid");
-                    key.classList.add(status);
+                // 'present' wird nicht von anderen Status überschrieben
+            } else if (currentStatus === 'absent') {
+                // 'absent' kann von allem überschrieben werden
+                usedLetters[letter] = status;
+            }
+
+            // Aktualisiere die Tastatur
+            const keys = keyboard.getElementsByClassName("key");
+            for (const keyElement of keys) {
+                let keyLetter = keyElement.dataset.key.toLowerCase();
+                if (keyLetter === 'ẞ') {
+                    keyLetter = 'ß';
+                }
+                if (keyLetter === letter) {
+                    // Entferne alle Status-Klassen
+                    keyElement.classList.remove("correct", "present", "absent");
+                    // Füge die neue Status-Klasse hinzu, falls vorhanden
+                    if (usedLetters[letter]) {
+                        keyElement.classList.add(usedLetters[letter]);
+                    }
+                    break; // Sobald die Taste gefunden wurde, breche die Schleife ab
                 }
             }
         }
