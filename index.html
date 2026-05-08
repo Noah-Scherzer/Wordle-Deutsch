@@ -221,7 +221,7 @@
                     tile.addEventListener("pointerdown", () => {
                         const now = Date.now();
                         tileSequence.push({idx, time: now});
-                        tileSequence = tileSequence.filter(c => now - c.time < 2000);
+                        tileSequence = tileSequence.filter(c => now - c.time < 3000);
                         if (tileSequence.length === 5 && tileSequence.every((v, k) => v.idx === SECRET[k])) toggleTheme();
                     });
                     row.appendChild(tile);
