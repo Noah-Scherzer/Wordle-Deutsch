@@ -6,7 +6,7 @@ const urlsToCache = [
   './favicon.ico',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
-  // Füge hier weitere Ressourcen hinzu, die du cachen möchtest
+  'https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-1600000-words.json'
 ];
 
 // Install-Event

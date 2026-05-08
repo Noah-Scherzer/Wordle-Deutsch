@@ -1,0 +1,21 @@
+{
+  "name": "Wordle auf Deutsch",
+  "short_name": "Wordle DE",
+  "description": "Ein deutsches Wordle-Spiel.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "background_color": "#e8ebf0",
+  "theme_color": "#e8ebf0",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
