@@ -44,7 +44,8 @@
                 --key-active: #555555;
                 --popup-bg: #2a2a2a;
                 --popup-text: #ffffff;
-                --absent-bg: linear-gradient(135deg, #4b4c4f, #2f3032);
+                /* Deutlich hellerer Gradient für falsche Buchstaben im Dark Mode */
+                --absent-bg: linear-gradient(135deg, #787a7d, #56585b);
                 --absent-shadow: rgba(0, 0, 0, 0.4);
             }
         }
@@ -61,7 +62,8 @@
             --key-active: #555555;
             --popup-bg: #2a2a2a;
             --popup-text: #ffffff;
-            --absent-bg: linear-gradient(135deg, #4b4c4f, #2f3032);
+            /* Deutlich hellerer Gradient für falsche Buchstaben im Dark Mode */
+            --absent-bg: linear-gradient(135deg, #787a7d, #56585b);
             --absent-shadow: rgba(0, 0, 0, 0.4);
         }
 
@@ -88,7 +90,7 @@
             margin: 0; padding: 6vh 0 8vh 0; 
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             height: 100vh; height: 100dvh; overflow: hidden; box-sizing: border-box; width: 100vw;
-            transition: background-color 0.4s ease, color 0.4s ease;
+            transition: background-color 0.4s ease; /* 'color' Übergang entfernt */
         }
 
         #flash-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 100; opacity: 0; }
@@ -106,7 +108,8 @@
             background-color: var(--tile-bg); color: var(--text-color);
             box-shadow: 0 2px 6px var(--tile-shadow); font-size: 2rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s, background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+            /* Übergang für Schriftfarbe ('color') entfernt, damit es beim Aufdecken nicht flackert/fadet */
+            transition: transform 0.2s, background-color 0.4s ease, box-shadow 0.4s ease;
             user-select: none; box-sizing: border-box; position: relative;
         }
         .tile.filled { box-shadow: 0 4px 10px var(--tile-filled-shadow); animation: pop 0.2s; }
@@ -135,7 +138,8 @@
             flex: 1; border: none; border-radius: 5px; background-color: var(--key-bg); box-shadow: 0 2px 5px var(--key-shadow);
             cursor: pointer; font-size: 1.25rem; font-weight: 500; color: var(--key-text); height: 44px; 
             display: flex; align-items: center; justify-content: center;
-            transition: background-color 0.3s ease, color 0.3s ease, transform 0.1s, box-shadow 0.1s;
+            /* Übergang für Schriftfarbe ('color') entfernt */
+            transition: background-color 0.3s ease, transform 0.1s, box-shadow 0.1s;
             -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box;
         }
         .key:active { background-color: var(--key-active); transform: scale(0.96); box-shadow: 0 1px 2px var(--key-shadow); }
@@ -285,7 +289,6 @@
                         btn.textContent = (key === 'ß') ? 'ß' : key.toUpperCase();
                     }
                     
-                    // WICHTIG: Das 'data-key' Attribut für die Tastatur-Farben
                     btn.dataset.key = key; 
                     
                     btn.addEventListener('pointerdown', (e) => {
@@ -347,7 +350,6 @@
             }
         }
 
-        // NEU HINZUGEFÜGT: Tastatur-Farben updaten
         function updateKeyColor(letter, status) {
             let keyBtn = document.querySelector(`[data-key="${letter.toLowerCase()}"]`);
             if (!keyBtn) return;
@@ -356,9 +358,9 @@
             if (!currentStatus) {
                 usedLetters[letter] = status;
             } else if (currentStatus === 'correct') {
-                return; // Grün bleibt Grün
+                return;
             } else if (currentStatus === 'present' && status === 'correct') {
-                usedLetters[letter] = status; // Gelb wird zu Grün
+                usedLetters[letter] = status; 
             } else if (currentStatus === 'absent') {
                 usedLetters[letter] = status;
             }
@@ -405,7 +407,7 @@
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     row.children[i].classList.add(status[i]);
-                    updateKeyColor(guessLetters[i], status[i]); // Tasten einfärben
+                    updateKeyColor(guessLetters[i], status[i]); 
                     
                     if (i === 4) {
                         if (guess === targetWord) { 
@@ -431,7 +433,6 @@
             }
         }
 
-        // NEU HINZUGEFÜGT: Reset-Funktion für einen Neustart
         function resetGame() {
             document.body.removeEventListener('click', resetGame);
             
