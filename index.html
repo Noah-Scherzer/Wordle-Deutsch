@@ -44,7 +44,6 @@
                 --key-active: #555555;
                 --popup-bg: #2a2a2a;
                 --popup-text: #ffffff;
-                /* Deutlich hellerer Gradient für falsche Buchstaben im Dark Mode */
                 --absent-bg: linear-gradient(135deg, #787a7d, #56585b);
                 --absent-shadow: rgba(0, 0, 0, 0.4);
             }
@@ -62,7 +61,6 @@
             --key-active: #555555;
             --popup-bg: #2a2a2a;
             --popup-text: #ffffff;
-            /* Deutlich hellerer Gradient für falsche Buchstaben im Dark Mode */
             --absent-bg: linear-gradient(135deg, #787a7d, #56585b);
             --absent-shadow: rgba(0, 0, 0, 0.4);
         }
@@ -90,7 +88,7 @@
             margin: 0; padding: 6vh 0 8vh 0; 
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             height: 100vh; height: 100dvh; overflow: hidden; box-sizing: border-box; width: 100vw;
-            transition: background-color 0.4s ease; /* 'color' Übergang entfernt */
+            transition: background-color 0.4s ease; 
         }
 
         #flash-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 100; opacity: 0; }
@@ -108,7 +106,6 @@
             background-color: var(--tile-bg); color: var(--text-color);
             box-shadow: 0 2px 6px var(--tile-shadow); font-size: 2rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center;
-            /* Übergang für Schriftfarbe ('color') entfernt, damit es beim Aufdecken nicht flackert/fadet */
             transition: transform 0.2s, background-color 0.4s ease, box-shadow 0.4s ease;
             user-select: none; box-sizing: border-box; position: relative;
         }
@@ -119,7 +116,6 @@
         .tile.error { background: linear-gradient(135deg, #ef5350, #e53935) !important; color: white !important; box-shadow: 0 3px 8px rgba(229, 57, 53, 0.4) !important; animation: errorShake 0.4s ease; }
         @keyframes errorShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 
-        /* Globale Status-Klassen für Kacheln UND Tasten */
         .correct { background: linear-gradient(135deg, #66bb6a, #43a047) !important; color: white !important; box-shadow: 0 3px 8px rgba(67, 160, 71, 0.3) !important; border: none !important; }
         .present { background: linear-gradient(135deg, #ffca28, #f39c12) !important; color: white !important; box-shadow: 0 3px 8px rgba(243, 156, 18, 0.3) !important; border: none !important; }
         .absent { background: var(--absent-bg) !important; color: white !important; box-shadow: 0 2px 5px var(--absent-shadow) !important; border: none !important; }
@@ -138,7 +134,6 @@
             flex: 1; border: none; border-radius: 5px; background-color: var(--key-bg); box-shadow: 0 2px 5px var(--key-shadow);
             cursor: pointer; font-size: 1.25rem; font-weight: 500; color: var(--key-text); height: 44px; 
             display: flex; align-items: center; justify-content: center;
-            /* Übergang für Schriftfarbe ('color') entfernt */
             transition: background-color 0.3s ease, transform 0.1s, box-shadow 0.1s;
             -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box;
         }
@@ -147,6 +142,33 @@
         .key svg { width: 24px; height: 24px; }
 
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* =========================================
+           SNAKE EASTER EGG STYLES
+           ========================================= */
+        #snake-controls {
+            display: none; 
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(2, 50px);
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+            height: 144px; 
+            z-index: 10;
+        }
+        .snake-key {
+            border: none; border-radius: 8px; background-color: var(--key-bg); box-shadow: 0 4px 10px var(--key-shadow);
+            cursor: pointer; color: var(--key-text);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s, background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .snake-key svg { width: 28px; height: 28px; }
+        .snake-key:active { background-color: var(--key-active); transform: scale(0.92); box-shadow: 0 1px 2px var(--key-shadow); }
+        .sk-up { grid-column: 2; grid-row: 1; }
+        .sk-left { grid-column: 1; grid-row: 2; }
+        .sk-down { grid-column: 2; grid-row: 2; }
+        .sk-right { grid-column: 3; grid-row: 2; }
     </style>
 </head>
 <body>
@@ -155,7 +177,23 @@
     <div id="message-wrapper">
         <div id="message"></div>
     </div>
+    
     <div id="keyboard"></div>
+    
+    <div id="snake-controls">
+        <button class="snake-key sk-up" data-dir="up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+        <button class="snake-key sk-left" data-dir="left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
+        <button class="snake-key sk-down" data-dir="down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </button>
+        <button class="snake-key sk-right" data-dir="right">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+    </div>
     
     <script>
         if ('serviceWorker' in navigator) {
@@ -178,6 +216,17 @@
 
         let tileSequence = [];
         const SECRET_SEQUENCE = [1, 2, 3, 7, 12]; 
+
+        // =========================================
+        // SNAKE VARIABLEN
+        // =========================================
+        let isSnakeMode = false;
+        let snakeInterval;
+        let snake = [];
+        let snakeDir = { x: 0, y: -1 };
+        let nextSnakeDir = { x: 0, y: -1 };
+        let snakeFood = null;
+        let snakeWord = "";
 
         function triggerVibration(pattern) {
             if (navigator.vibrate) navigator.vibrate(pattern);
@@ -227,6 +276,7 @@
         }
 
         function handleTileClick(index) {
+            if (isSnakeMode) return; // Klicks im Snake-Modus ignorieren
             const now = Date.now();
             tileSequence.push({ index: index, time: now });
             tileSequence = tileSequence.filter(click => now - click.time < 2000);
@@ -318,7 +368,23 @@
                 .catch(err => showMessage("Fehler beim Laden der Wörter!", 0));
         }, 100);
 
+        // =========================================
+        // EVENT LISTENER (ANGEPASST FÜR SNAKE)
+        // =========================================
         document.addEventListener("keydown", (e) => {
+            if (isSnakeMode) {
+                if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key)) {
+                    e.preventDefault(); // Verhindert das Scrollen der Seite
+                }
+                switch(e.key) {
+                    case "ArrowUp": case "w": case "W": setSnakeDir(0, -1); break;
+                    case "ArrowDown": case "s": case "S": setSnakeDir(0, 1); break;
+                    case "ArrowLeft": case "a": case "A": setSnakeDir(-1, 0); break;
+                    case "ArrowRight": case "d": case "D": setSnakeDir(1, 0); break;
+                }
+                return;
+            }
+            
             if (gameOver || !isReady) return;
             const key = e.key;
             if (key === "Backspace") handleKey('backspace');
@@ -326,8 +392,26 @@
             else if (/^[a-zäöüß]$/i.test(key)) handleKey(key.toLowerCase());
         });
 
+        // Steuerung für die On-Screen Snake Buttons
+        document.getElementById('snake-controls').addEventListener('pointerdown', (e) => {
+            const btn = e.target.closest('.snake-key');
+            if (!btn) return;
+            e.preventDefault();
+            const dir = btn.dataset.dir;
+            if (dir === 'up') setSnakeDir(0, -1);
+            if (dir === 'down') setSnakeDir(0, 1);
+            if (dir === 'left') setSnakeDir(-1, 0);
+            if (dir === 'right') setSnakeDir(1, 0);
+        });
+
+        function setSnakeDir(dx, dy) {
+            // Verhindert, dass die Snake direkt in sich selbst umkehrt
+            if (snake.length > 1 && snakeDir.x === -dx && snakeDir.y === -dy) return;
+            nextSnakeDir = { x: dx, y: dy };
+        }
+
         function handleKey(key) {
-            if (gameOver || !isReady) return;
+            if (gameOver || !isReady || isSnakeMode) return; // Snake Check hinzugefügt
             const row = game.children[currentRow];
 
             triggerVibration(8); 
@@ -373,6 +457,14 @@
             const guess = guesses[currentRow];
             const row = game.children[currentRow];
             
+            // =========================================
+            // SNAKE TRIGGER
+            // =========================================
+            if (guess === 'snake') {
+                startSnakeGame();
+                return;
+            }
+
             if (!WORDS.includes(guess)) {
                 triggerVibration([20, 30, 20]); 
                 row.classList.add("board-shake");
@@ -459,6 +551,133 @@
             });
             
             messageElement.classList.remove("show");
+        }
+
+        // =========================================
+        // SNAKE SPIELLOGIK
+        // =========================================
+        function startSnakeGame() {
+            isSnakeMode = true;
+            document.getElementById('keyboard').style.display = 'none';
+            document.getElementById('snake-controls').style.display = 'grid';
+
+            // Ein neues Zielwort für Snake aussuchen
+            snakeWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            
+            // Snake in der Mitte spawnen (Grid ist 5x6, Mitte ist ca x:2, y:2)
+            snake = [{ x: 2, y: 2 }];
+            snakeDir = { x: 0, y: -1 };
+            nextSnakeDir = { x: 0, y: -1 };
+            
+            clearBoardUI();
+            placeFood();
+            
+            let displayWord = snakeWord.toUpperCase().replace(/ß/gi, 'ß');
+            showMessage("Sammle: " + displayWord, 2500);
+            
+            // Start Loop (400ms ist eine gute, spielbare Geschwindigkeit für das winzige Grid)
+            snakeInterval = setInterval(snakeLoop, 400); 
+        }
+
+        function clearBoardUI() {
+            const tiles = document.querySelectorAll('.tile');
+            tiles.forEach(tile => {
+                tile.textContent = '';
+                tile.className = 'tile'; 
+            });
+        }
+
+        function placeFood() {
+            let emptySpots = [];
+            for (let y = 0; y < 6; y++) {
+                for (let x = 0; x < 5; x++) {
+                    if (!snake.some(s => s.x === x && s.y === y)) {
+                        emptySpots.push({ x, y });
+                    }
+                }
+            }
+            if (emptySpots.length > 0) {
+                snakeFood = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+            }
+        }
+
+        function snakeLoop() {
+            snakeDir = nextSnakeDir;
+            const head = snake[0];
+            const nextHead = { x: head.x + snakeDir.x, y: head.y + snakeDir.y };
+
+            // 1. Check: Wand getroffen?
+            if (nextHead.x < 0 || nextHead.x > 4 || nextHead.y < 0 || nextHead.y > 5) {
+                return endGameSnake(false);
+            }
+
+            // 2. Check: Sich selbst gebissen?
+            if (snake.some(s => s.x === nextHead.x && s.y === nextHead.y)) {
+                return endGameSnake(false);
+            }
+
+            // Kopf bewegen
+            snake.unshift(nextHead);
+
+            // 3. Check: Essen gefunden?
+            if (nextHead.x === snakeFood.x && nextHead.y === snakeFood.y) {
+                triggerVibration(15);
+                if (snake.length === 5) { // 5-Buchstaben-Wort komplett!
+                    renderSnakeUI();
+                    return endGameSnake(true);
+                } else {
+                    placeFood();
+                }
+            } else {
+                // Schwanz nachziehen, wenn nicht gegessen wurde
+                snake.pop(); 
+            }
+
+            renderSnakeUI();
+        }
+
+        function renderSnakeUI() {
+            clearBoardUI();
+            
+            // Zeichne das Essen (Gelb)
+            if (snakeFood && snake.length < 5) {
+                const foodTile = game.children[snakeFood.y].children[snakeFood.x];
+                let letter = snakeWord[snake.length];
+                foodTile.textContent = (letter === 'ß') ? 'ß' : letter.toUpperCase();
+                foodTile.classList.add("present", "filled", "jump"); // Springt kurz auf
+            }
+
+            // Zeichne die Snake (Grün)
+            snake.forEach((part, index) => {
+                const tile = game.children[part.y].children[part.x];
+                let letter = snakeWord[index];
+                tile.textContent = (letter === 'ß') ? 'ß' : letter.toUpperCase();
+                tile.classList.add("correct", "filled");
+            });
+        }
+
+        function endGameSnake(won) {
+            clearInterval(snakeInterval);
+            
+            if (won) {
+                triggerVibration([50, 100, 200]);
+                flashOverlay.className = "flash-win";
+                showMessage("Gewonnen!", 2000);
+            } else {
+                triggerVibration([200, 100, 300]);
+                flashOverlay.className = "flash-loss";
+                game.classList.add("board-shake");
+                let displayWord = snakeWord.toUpperCase().replace(/ß/gi, 'ß');
+                showMessage("Game Over! Wort: " + displayWord, 3000);
+            }
+            
+            // Nach 3 Sekunden räumen wir das Spielfeld auf und starten normales Wordle
+            setTimeout(() => {
+                isSnakeMode = false;
+                document.getElementById('keyboard').style.display = 'flex';
+                document.getElementById('snake-controls').style.display = 'none';
+                resetGame(); 
+            }, 3000);
         }
     </script>
 </body>
