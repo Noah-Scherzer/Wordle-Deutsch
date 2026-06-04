@@ -44,6 +44,7 @@
                 --key-active: #555555;
                 --popup-bg: #2a2a2a;
                 --popup-text: #ffffff;
+                /* Deutlich hellerer Gradient für falsche Buchstaben im Dark Mode */
                 --absent-bg: linear-gradient(135deg, #787a7d, #56585b);
                 --absent-shadow: rgba(0, 0, 0, 0.4);
             }
@@ -205,8 +206,10 @@
         const messageElement = document.getElementById("message");
         const flashOverlay = document.getElementById("flash-overlay");
 
-        let WORDS = [];
+        let TARGET_WORDS = []; 
+        let WORDS = []; 
         let targetWord = '';
+        
         let currentRow = 0;
         let currentCol = 0;
         let gameOver = false;
@@ -276,7 +279,7 @@
         }
 
         function handleTileClick(index) {
-            if (isSnakeMode) return; // Klicks im Snake-Modus ignorieren
+            if (isSnakeMode) return; // Klicks ignorieren, wenn Snake läuft
             const now = Date.now();
             tileSequence.push({ index: index, time: now });
             tileSequence = tileSequence.filter(click => now - click.time < 2000);
@@ -356,25 +359,34 @@
         buildUI();
         showMessage("Wörter werden geladen...", 0);
 
+        // BEIDE JSONs laden (via Promise.all parallel aus dem Repository)
         setTimeout(() => {
-            fetch('https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-1600000-words.json')
-                .then(res => res.json())
-                .then(data => {
-                    WORDS = data.filter(w => w.length === 5 && /^[a-zäöüß]+$/i.test(w)).map(w => w.toLowerCase());
-                    targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-                    isReady = true;
-                    messageElement.classList.remove("show");
-                })
-                .catch(err => showMessage("Fehler beim Laden der Wörter!", 0));
+            Promise.all([
+                fetch('https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-5000-words.json').then(res => res.json()),
+                fetch('https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-1600000-words.json').then(res => res.json())
+            ])
+            .then(([smallData, largeData]) => {
+                TARGET_WORDS = smallData.filter(w => w.length === 5 && /^[a-zäöüß]+$/i.test(w)).map(w => w.toLowerCase());
+                let externalWords = largeData.filter(w => w.length === 5 && /^[a-zäöüß]+$/i.test(w)).map(w => w.toLowerCase());
+                
+                WORDS = Array.from(new Set([...externalWords, ...TARGET_WORDS]));
+                targetWord = TARGET_WORDS[Math.floor(Math.random() * TARGET_WORDS.length)];
+                
+                isReady = true;
+                messageElement.classList.remove("show");
+            })
+            .catch(err => {
+                showMessage("Fehler beim Laden der Wörter!", 0);
+            });
         }, 100);
 
         // =========================================
-        // EVENT LISTENER (ANGEPASST FÜR SNAKE)
+        // EVENT LISTENER (INKL. SNAKE STEUERUNG)
         // =========================================
         document.addEventListener("keydown", (e) => {
             if (isSnakeMode) {
                 if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key)) {
-                    e.preventDefault(); // Verhindert das Scrollen der Seite
+                    e.preventDefault(); 
                 }
                 switch(e.key) {
                     case "ArrowUp": case "w": case "W": setSnakeDir(0, -1); break;
@@ -392,7 +404,7 @@
             else if (/^[a-zäöüß]$/i.test(key)) handleKey(key.toLowerCase());
         });
 
-        // Steuerung für die On-Screen Snake Buttons
+        // Steuerung für On-Screen Snake Buttons
         document.getElementById('snake-controls').addEventListener('pointerdown', (e) => {
             const btn = e.target.closest('.snake-key');
             if (!btn) return;
@@ -405,13 +417,12 @@
         });
 
         function setSnakeDir(dx, dy) {
-            // Verhindert, dass die Snake direkt in sich selbst umkehrt
             if (snake.length > 1 && snakeDir.x === -dx && snakeDir.y === -dy) return;
             nextSnakeDir = { x: dx, y: dy };
         }
 
         function handleKey(key) {
-            if (gameOver || !isReady || isSnakeMode) return; // Snake Check hinzugefügt
+            if (gameOver || !isReady || isSnakeMode) return;
             const row = game.children[currentRow];
 
             triggerVibration(8); 
@@ -464,7 +475,7 @@
                 startSnakeGame();
                 return;
             }
-
+            
             if (!WORDS.includes(guess)) {
                 triggerVibration([20, 30, 20]); 
                 row.classList.add("board-shake");
@@ -533,7 +544,8 @@
             gameOver = false;
             guesses = ["", "", "", "", "", ""];
             usedLetters = {};
-            targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            
+            targetWord = TARGET_WORDS[Math.floor(Math.random() * TARGET_WORDS.length)];
             
             flashOverlay.className = "";
             game.classList.remove("board-shake");
@@ -561,11 +573,11 @@
             document.getElementById('keyboard').style.display = 'none';
             document.getElementById('snake-controls').style.display = 'grid';
 
-            // Ein neues Zielwort für Snake aussuchen
-            snakeWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            snakeWord = TARGET_WORDS[Math.floor(Math.random() * TARGET_WORDS.length)];
             
-            // Snake in der Mitte spawnen (Grid ist 5x6, Mitte ist ca x:2, y:2)
-            snake = [{ x: 2, y: 2 }];
+            // STARTPOSITION: Unten in der Mitte (y = 5, x = 2)
+            snake = [{ x: 2, y: 5 }];
+            // START-RICHTUNG: Nach oben
             snakeDir = { x: 0, y: -1 };
             nextSnakeDir = { x: 0, y: -1 };
             
@@ -575,7 +587,6 @@
             let displayWord = snakeWord.toUpperCase().replace(/ß/gi, 'ß');
             showMessage("Sammle: " + displayWord, 2500);
             
-            // Start Loop (400ms ist eine gute, spielbare Geschwindigkeit für das winzige Grid)
             snakeInterval = setInterval(snakeLoop, 400); 
         }
 
@@ -606,31 +617,33 @@
             const head = snake[0];
             const nextHead = { x: head.x + snakeDir.x, y: head.y + snakeDir.y };
 
-            // 1. Check: Wand getroffen?
+            // Wand getroffen?
             if (nextHead.x < 0 || nextHead.x > 4 || nextHead.y < 0 || nextHead.y > 5) {
                 return endGameSnake(false);
             }
 
-            // 2. Check: Sich selbst gebissen?
+            // Sich selbst gebissen?
             if (snake.some(s => s.x === nextHead.x && s.y === nextHead.y)) {
                 return endGameSnake(false);
             }
 
-            // Kopf bewegen
             snake.unshift(nextHead);
 
-            // 3. Check: Essen gefunden?
+            // Essen gefunden?
             if (nextHead.x === snakeFood.x && nextHead.y === snakeFood.y) {
-                triggerVibration(15);
-                if (snake.length === 5) { // 5-Buchstaben-Wort komplett!
+                // Coole Vibration, wenn ein Buchstabe gefressen wird
+                triggerVibration([20, 30, 20]);
+                
+                if (snake.length === 5) { 
                     renderSnakeUI();
                     return endGameSnake(true);
                 } else {
                     placeFood();
                 }
             } else {
-                // Schwanz nachziehen, wenn nicht gegessen wurde
                 snake.pop(); 
+                // Ganz kurzes, feines Ticken bei jedem Schritt
+                triggerVibration(5);
             }
 
             renderSnakeUI();
@@ -639,15 +652,13 @@
         function renderSnakeUI() {
             clearBoardUI();
             
-            // Zeichne das Essen (Gelb)
             if (snakeFood && snake.length < 5) {
                 const foodTile = game.children[snakeFood.y].children[snakeFood.x];
                 let letter = snakeWord[snake.length];
                 foodTile.textContent = (letter === 'ß') ? 'ß' : letter.toUpperCase();
-                foodTile.classList.add("present", "filled", "jump"); // Springt kurz auf
+                foodTile.classList.add("present", "filled", "jump"); 
             }
 
-            // Zeichne die Snake (Grün)
             snake.forEach((part, index) => {
                 const tile = game.children[part.y].children[part.x];
                 let letter = snakeWord[index];
@@ -671,7 +682,6 @@
                 showMessage("Game Over! Wort: " + displayWord, 3000);
             }
             
-            // Nach 3 Sekunden räumen wir das Spielfeld auf und starten normales Wordle
             setTimeout(() => {
                 isSnakeMode = false;
                 document.getElementById('keyboard').style.display = 'flex';
@@ -682,3 +692,4 @@
     </script>
 </body>
 </html>
+
