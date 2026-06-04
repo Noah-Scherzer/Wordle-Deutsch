@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordle-cache-v1';
+const CACHE_NAME = 'wordle-cache-v2'; // Ich habe die Version auf v2 geändert, um ein Cache-Update zu erzwingen!
 const urlsToCache = [
   './',
   './index.html',
@@ -6,7 +6,8 @@ const urlsToCache = [
   './favicon.ico',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
-  'https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-1600000-words.json'
+  './target-words.json', // NEU: Die lokale Datei!
+  'https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-1600000-words.json' // Bleibt für die Eingaben
 ];
 
 // Install-Event
